@@ -1,0 +1,12 @@
+- hosts: all
+  tasks:
+   - name: installing httpd
+     package:
+             name: httpd
+             state: present
+   - name: copy the content
+     copy:
+             content: "Hello Moqaddas"
+             dest: "/var/www/html/index.html"
+   - name: starting the service
+     shell: "/usr/sbin/httpd -DFOREGROUND &"

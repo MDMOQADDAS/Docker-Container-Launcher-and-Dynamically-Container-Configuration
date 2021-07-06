@@ -1,0 +1,32 @@
+- hosts: localhost
+  vars_prompt:
+      - name: c_name
+        prompt: "Enter Container Name: "
+        private: no
+  
+  tasks:
+  - name: Intalling required python sdk
+    pip:
+       name: docker-py
+   
+    
+  - name: Container starting
+    docker_container:
+          name: "{{c_name}}"
+          state: started
+          image: moqaddas/openssh-server:latest
+          published_ports: "1111:80"
+    register: c_info
+  - name: Container Info
+    debug:
+            var: c_info
+  - name: only ip debug
+    debug:
+            var: c_info.container.NetworkSettings.Networks.bridge.IPAddress
+  - name: updating the inventory
+    lineinfile:
+       path: inventory
+       line: "{{c_info.container.NetworkSettings.Networks.bridge.IPAddress}}"
+       regexp: 172.17.0.*
+  - name: Copy the ssh key
+    shell: "ssh-copy-id  root@{{c_info.container.NetworkSettings.Networks.bridge.IPAddress}}"
